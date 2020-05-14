@@ -1,0 +1,52 @@
+///////////////////////////////Not The Author////////////////////
+
+public class AugsburgPerson {
+
+    public enum Role {
+        student, staff, faculty;
+    }
+
+    public enum Dept {
+        csc("CompSci"),
+        mat("Math"),
+        bus("Business"),
+        enl("English");
+        private final String value;
+
+        Dept(String v) {
+            this.value = v;
+        }
+
+        public String value() {
+            return this.value;
+        }
+
+        public String toString() {
+            return this.value;
+        }
+    } // end enum Dept
+
+    private String lastName;
+    private String firstName;
+    private Role role;
+    private Dept department;
+
+    public AugsburgPerson(String first, String last, Role r, Dept d) {
+        this.firstName = first;
+        this.lastName = last;
+        this.role = r;
+        this.department = d;
+    }
+
+    public String toString() {
+        return getName() + ", " + role + " in " + department;
+    }
+
+    public String getName() {
+        return firstName + " " + lastName;
+    }
+
+    public Dept getDept() {
+        return department;
+    }
+}
