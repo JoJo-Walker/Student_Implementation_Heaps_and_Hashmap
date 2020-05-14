@@ -1,0 +1,223 @@
+
+import java.util.function.*;
+import java.util.Comparator;
+
+class TestQueue {
+
+    // static Faculty and Courses are defined at the bottom of this file.
+    public static void main(String[] args) {
+
+        List<Assignment> assignmentList = new List<>();
+
+        // Add assignments to the list, which essentially functions like a db.
+        // Not all assignments will necessarily be in the priority Q.
+        assignmentList.add(new Assignment(Assignment.Type.programming, "Project 1", csc210, new Date(Date.Month.feb, 12, 23), 600, .10));
+
+        assignmentList.add(new Assignment(Assignment.Type.lab, "Lab 5", csc210, new Date(Date.Month.mar, 10, 23), 120, .05));
+
+        assignmentList.add(new Assignment(Assignment.Type.math, "Homework 8", mat101, new Date(Date.Month.feb, 10, 9), 200, .025));
+
+        assignmentList.add(new Assignment(Assignment.Type.reading, "ZyBooks Ch.12", csc210, new Date(Date.Month.apr, 5, 14), 20, 0.0));
+
+        assignmentList.add(new Assignment(Assignment.Type.reading, "Ch. 23", csc320, new Date(Date.Month.feb, 4, 12), 60, 0.0));
+
+        assignmentList.add(new Assignment(Assignment.Type.reading, "Ch. 9", mat101, new Date(Date.Month.mar, 6, 9), 45, 0.0));
+
+        assignmentList.add(new Assignment(Assignment.Type.writing, "Research Paper", bus200, new Date(Date.Month.feb, 12, 14), 600, .20));
+
+        assignmentList.add(new Assignment(Assignment.Type.programming, "Lab 6", csc210, new Date(Date.Month.apr, 1, 14), 400, .20));
+
+        assignmentList.add(new Assignment(Assignment.Type.math, "Homework 9", mat101, new Date(Date.Month.apr, 12, 14), 180, .05));
+
+        System.out.println("\n\n>>>> All assignments in the original list");
+        System.out.println(assignmentList);
+
+        /* The find method is making use of a LAMBDA function.
+		In the first call to find below, the first parameter is a function.
+		The syntax (Assignment a)->a.id() can be though of like this ...
+		    public Object unnamedFunction(Assignment a) {
+				    return a.id();
+			}
+		This can be used in place of creating a special comparator for each field value.
+         */
+        // Change the status of assignment 1001003 to complete.
+        assignmentList.find((Assignment a) -> a.id(), 100103).complete(true);
+        // Print the assignment with this description.
+        System.out.println("\n>>>> Demonstrating find in the list.");
+        System.out.println(
+                assignmentList.find((Assignment a) -> a.description(), "Project 1"));
+
+        // Not necessary to rewrite the lambda function each time.
+        // Instead of writing comparators, you can create lambda fns like this...
+        Function<Assignment, Object> fnId = (Assignment a) -> a.id();
+        Function<Assignment, Object> fnDesc = (Assignment a) -> a.description();
+
+        // This removes assignment 100105 from the assignmentList.
+        assignmentList.remove(fnId, 100105);
+        System.out.println();
+        System.out.println("\n\n>>>> Assignment list after 1001005 was removed.");
+        System.out.println(assignmentList);
+
+        PriorityQueue<Assignment> todo = new PriorityQueue<>(orderByLeastTime);
+
+        Assignment[] allInList = new Assignment[assignmentList.length()];
+
+        assignmentList.toArray(allInList);
+
+        todo.addAll(allInList);
+
+        System.out.println(
+                "\n\n>>>> Priority Q in order");
+        Object[] todoList = todo.toArray();
+        for (Object a : todoList) {
+            System.out.println((Assignment) a);
+        }
+
+        System.out.println(
+                "\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> Change Assignments>>>>>>>>>>>>>>>>");
+        System.out.println(
+                "\n\n>>>> Priority Q BEFORE changing assignments");
+        Assignment v = new Assignment(Assignment.Type.reading, "Ch. 23", csc320, new Date(Date.Month.feb, 4, 12), 60, 0.0);
+        assignmentList.add(v);
+        todo.add(v);
+        todoList = todo.toArray();
+        for (Object a : todoList) {
+            System.out.println((Assignment) a);
+        }
+        /* ----------------------  Change Assignments -------------- */
+ /*
+		Apply the changes below to each assignment stored in assignmentList.
+		Find the object in the list based on the description, and change its time.
+		Then "inform" the PriorityQueue that the key value has changed.
+		Print out the before and after to make sure everything is working.
+		- "Project 1" : you worked 90 minutes on this assignment
+		- "Ch. 9" : you worked 45 minutes on this assignment
+		- "Research Paper" : you underestimated the work on this, add 60 minutes
+		- "Lab 5" : you overestimated the work on this, subtract 45 minutes
+		- "Ch. 23" : you completed this assignment. Remove it from the heap!
+         */
+        assignmentList.find(fnDesc, "Project 1").changeTimeToCompletion(-90);
+        assignmentList.find(fnDesc, "Ch. 9").changeTimeToCompletion(-45);
+        assignmentList.find(fnDesc, "Research Paper").changeTimeToCompletion(60);
+        assignmentList.find(fnDesc, "Lab 5").changeTimeToCompletion(-45);
+        assignmentList.find(fnDesc, "Ch. 23").complete(true);
+
+        todo.remove(assignmentList.find(fnDesc, "Ch. 23"));
+        todo.keyHasChanged(assignmentList.find(fnDesc, "Project 1"));
+        todo.keyHasChanged(assignmentList.find(fnDesc, "Ch. 9"));
+        todo.keyHasChanged(assignmentList.find(fnDesc, "Reserach Paper"));
+        todo.keyHasChanged(assignmentList.find(fnDesc, "Lab 5"));
+
+        System.out.println(
+                "\n\n>>>> Priority Q AFTER changing assignments");
+        todoList = todo.toArray();
+        for (Object a : todoList) {
+            System.out.println((Assignment) a);
+        }
+
+        System.out.println(
+                "\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> END Change Assignments>>>>>>>>>>>>>>>>");
+
+        System.out.println(
+                "\n\n>>>> Quick test of toArray(Comparator) w/EarliestDate");
+        todoList = todo.toArray(orderByEarliestDueDate);
+        for (Object a : todoList) {
+            System.out.println((Assignment) a);
+        }
+
+        testPriorityQueueMethods();
+        
+    } // end main.
+
+    /* --------------    FACULTY -------------------*/
+    static AugsburgPerson larson = new AugsburgPerson("Amy", "Larson", AugsburgPerson.Role.faculty, AugsburgPerson.Dept.csc);
+
+    static AugsburgPerson doree = new AugsburgPerson("Su", "Doree", AugsburgPerson.Role.faculty, AugsburgPerson.Dept.mat);
+
+    static AugsburgPerson steinmetz = new AugsburgPerson("Eric", "Steinmetz", AugsburgPerson.Role.faculty, AugsburgPerson.Dept.csc);
+
+    static AugsburgPerson jang = new AugsburgPerson("Soebin", "Jang", AugsburgPerson.Role.faculty, AugsburgPerson.Dept.bus);
+
+    /* -------------    COURSES ----------------- */
+    static Course csc320 = new Course(Course.Designator.CSC, "320", "Algorithms", Course.Term.Fall, 2019, larson);
+
+    static Course csc210 = new Course(Course.Designator.CSC, "210", "Data Structures", Course.Term.Fall, 2019, larson);
+
+    static Course mat101 = new Course(Course.Designator.MAT, "101", "Algebra", Course.Term.Fall, 2019, doree);
+
+    static Course bus200 = new Course(Course.Designator.BUS, "200", "Marketing", Course.Term.Fall, 2019, jang);
+
+    public static void testPriorityQueueMethods() {
+        System.out.println(
+                "\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Testing PriorityQueue");
+        PriorityQueue<Assignment> todo = new PriorityQueue<>(orderByEarliestDueDate);
+
+        Assignment j = new Assignment(Assignment.Type.reading, "Ch. 9", mat101, new Date(Date.Month.mar, 6, 9), 45, 0.0);
+        Assignment m = new Assignment(Assignment.Type.reading, "Ch. 23", csc320, new Date(Date.Month.feb, 4, 12), 60, 0.0);
+        Assignment k = new Assignment(Assignment.Type.math, "Homework 9", mat101, new Date(Date.Month.apr, 12, 14), 180, .05);
+        System.out.println(
+                "\n\n>>>> Testing Add(object)");
+        todo.clear();
+        todo.add(k);
+        todo.add(j);
+        todo.add(m);
+
+        System.out.println(
+                "\n\n>>>> Testing Extract(object)");
+        Assignment temp = todo.extract();
+        System.out.println(temp);
+
+        System.out.println(
+                "\n\n>>>> Testing Remove()");
+        todo.remove(j);
+
+        System.out.println(
+                "\n\n>>>> Testing peekTop3()");
+        todo.add(m);
+        todo.add(k);
+        todo.peekTop3();
+
+        todo.reheap(orderByLeastTime);
+        todo.reheap(orderByMostTime);
+        todo.reheap(orderByGreatestWeight);
+    }
+
+    /* Prioritize by least time to completion */
+    static Comparator<Assignment> orderByLeastTime = new Comparator<>() {
+        @Override
+        public int compare(Assignment a1, Assignment a2) {
+            return a2.toComplete().compareTo(a1.toComplete());
+        }
+    };
+
+    /* Prioritize by most time to completion */
+    static Comparator<Assignment> orderByMostTime = new Comparator<>() {
+        @Override
+        public int compare(Assignment a1, Assignment a2) {
+            return a1.toComplete().compareTo(a2.toComplete());
+        }
+    };
+
+    // Prioritize by the most recent due date.
+    static Comparator<Assignment> orderByEarliestDueDate = new Comparator<>() {
+        @Override
+        public int compare(Assignment a1, Assignment a2) {
+            return a2.dueDate().compareTo(a1.dueDate());
+        }
+    };
+
+    // Prioritize by the assignment with greatest grade weight
+    static Comparator<Assignment> orderByGreatestWeight = new Comparator<>() {
+        @Override
+        public int compare(Assignment a1, Assignment a2) {
+            if ((Math.abs(a2.weight() - a1.weight())) < .009) {
+                return 0;
+            } else if ((a2.weight() - a1.weight()) > 0) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
+    };
+}
