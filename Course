@@ -1,0 +1,56 @@
+///////////////////////////////Not The Author/////////////////////
+
+public class Course {
+
+    public enum Designator {
+        CSC, MAT, BUS, ENL;
+    }
+
+    public enum Term {
+        Fall, Spring, Summer;
+    }
+
+    private Designator designator;
+    private String courseNumber;
+    private String title;
+    private Term term;
+    private Integer year;
+    private AugsburgPerson instructor;
+
+    public Course(Designator d, String num, String inTitle, Term inTerm, Integer inYear, AugsburgPerson person) {
+        this.designator = d;
+        this.courseNumber = num;
+        this.title = inTitle;
+        this.term = inTerm;
+        this.year = inYear;
+        this.instructor = person;
+    }
+
+    public String toString() {
+        return designator + courseNumber;
+    }
+
+    public Designator getDesignator() {
+        return designator;
+    }
+
+    public String getNumber() {
+        return courseNumber;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Term getTerm() {
+        return term;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public AugsburgPerson getInstructor() {
+        return instructor;
+    }
+}
