@@ -1,0 +1,83 @@
+//////////////////////////////////////////Not The Author///////////////////////////////////
+import java.lang.*;
+import java.util.*;
+
+public class Date implements Comparable<Date> {
+
+    public enum Month {
+        jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec;
+    }
+    /**
+     * Enum month it is due. Can assume year is the term year of the course.
+     */
+    private Month month;
+
+    /**
+     * Day of the month it is due
+     */
+    private Integer day;
+
+    /**
+     * Hour of the day it is due (0-23). We won't worry about minutes.
+     */
+    private Integer hour;
+
+    public Date(Month m, Integer d, Integer h) {
+        month = m;
+        day = d;
+        hour = h;
+    }
+
+    public String toString() {
+        return String.format("%2s %s %2sh0m", day, month, hour);
+    }
+
+    // Setters and Getters
+    public void month(Date.Month m) {
+        month = m;
+    }
+
+    public Date.Month month() {
+        return month;
+    }
+
+    public void day(Integer d) {
+        day = d;
+    }
+
+    public Integer day() {
+        return day;
+    }
+
+    public void hour(Integer h) {
+        hour = h;
+    }
+
+    public Integer hour() {
+        return hour;
+    }
+
+    /* Comparison of dates.
+     */
+    @Override
+    public int compareTo(Date d) {
+        if (this.month == d.month) {
+            // same month
+            if (this.day == d.day) {
+                // same day, return hour comparison
+                return this.hour - d.hour;
+                // different day, return that comparison
+            } else {
+                return this.day - d.day;
+            }
+        }
+        // different months
+        return this.month.compareTo(d.month);
+    } // end comparetor()
+
+    @Override
+    public boolean equals(Object data) {
+        Date d = (Date) data;
+        return (this.month == d.month) && (this.day == d.day) && (this.hour == d.hour);
+    }
+} // end class Date
