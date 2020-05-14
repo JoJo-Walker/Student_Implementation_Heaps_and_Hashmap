@@ -1,0 +1,176 @@
+////////////////////////////////Not The Author//////////////////////
+
+import java.util.*;
+
+public class Assignment {
+
+    /**
+     * Used to generate a unique ID for elements in the list
+     */
+    private static final int BASE_ID = 100100;
+
+    /**
+     * total number of elements ever created for this list
+     */
+    private static int numberCreated = 0;
+
+    private static int uniqueId() {
+        ++numberCreated;
+        return BASE_ID + numberCreated;
+    }
+
+    public enum Type {
+        writing, math, programming, lab, reading;
+    }
+
+    /**
+     * Enum type of assignment (e.g. writing, lab, reading, etc.)
+     */
+    private Type type;
+
+    /**
+     * Unique ID.
+     */
+    private Integer id = null;
+
+    /**
+     * Class course in which assignment is due.
+     */
+    private Course course;
+
+    /**
+     * Description of assignment.
+     */
+    private String description = "";
+
+    /**
+     * Date and Time due.
+     */
+    private Date dueDate;
+
+    /**
+     * Amount of time needed to complete the assignment in minutes.
+     */
+    private Integer minutesToComplete = 0;
+
+    /**
+     * Weight relative to final grade.
+     */
+    private Double weight = 0.0;
+
+    /**
+     * Complete or not complete.
+     */
+    private boolean complete = false;
+
+    /**
+     * Constructor.
+     *
+     * @param t Enum assignment type
+     * @param d text description of assignment
+     * @param c assignment for this course
+     * @param due time/date due
+     */
+    public Assignment(Type t, String d, Course c, Date due, Integer mins, Double w) {
+        type = t;
+        description = d;
+        course = c;
+        minutesToComplete = mins;
+        dueDate = due;
+        weight = w;
+        id = uniqueId();
+    }
+
+    public String toString() {
+        String returnString = String.format("(%d) %d  %s %s %-15s",
+                 id, minutesToComplete, dueDate, course, description);
+        if (isComplete()) {
+            returnString += "\u2713";
+        }
+        return returnString;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        Assignment a = (Assignment) obj;
+        return (id == a.id());
+    }
+
+    /* Getters ------------------- */
+    public Type type() {
+        return type;
+    }
+
+    public Integer id() {
+        return id;
+    }
+
+    public String description() {
+        return description;
+    }
+
+    public Course course() {
+        return course;
+    }
+
+    public Date dueDate() {
+        return dueDate;
+    }
+
+    public Integer toComplete() {
+        return minutesToComplete;
+    }
+
+    public Double weight() {
+        return weight;
+    }
+
+    public boolean isComplete() {
+        return this.complete;
+    }
+
+    /* Setters ------------------- */
+    public void id(Integer num) {
+        id = num;
+    }
+
+    public void dueDate(Date d) {
+        dueDate = d;
+    }
+
+    public void description(String d) {
+        description = d;
+    }
+
+    public void type(Type t) {
+        type = t;
+    }
+
+    /**
+     * Set the assignment as complete. Set the flag and minutesToCompletion.
+     *
+     * @param tf true or false.
+     */
+    public void complete(boolean tf) {
+        complete = tf;
+        if (complete) {
+            minutesToComplete = 0;
+        }
+    }
+
+    /**
+     * Adjust time needed to complete assignment either as a reestimate or to
+     * reflect time already spent completing it. Will adjust complete status as
+     * appropriate.
+     *
+     * @param mins Add to minutesToComplete (or subtract if mins negative)
+     */
+    public void changeTimeToCompletion(Integer mins) {
+        minutesToComplete += mins;
+        if (minutesToComplete > 0) {
+            complete = false;
+        } else {
+            complete = true;
+        }
+    }
+}
