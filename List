@@ -1,0 +1,191 @@
+
+import java.util.Comparator;
+import java.util.function.*;
+
+/**
+ * A list of generic type objects stored in an array. Primary ops only: add,
+ * remove, find. Using lambda functions to search based on field value within T
+ * type object.
+ */
+class List<T> {
+
+    private static final int DEFAULT_CAPACITY_INCREASE = 10;
+
+    /**
+     * current number of elements in list
+     */
+    private int numberOfItems = 0;
+
+    /**
+     * basic data structure to hold list elements
+     */
+    private T[] items = null;
+
+    /**
+     * Constructor with user-defined capacity of list
+     */
+    public List() {
+        /* A declaration of an array like below is generally not advised!!
+    If you were not trying to learn about data structures and how they are implemented, you would use one of Java's Collections classes (e.g. ArrayList, LinkedList, etc.).
+         */
+        @SuppressWarnings("unchecked")
+        T[] temp = (T[]) new Object[DEFAULT_CAPACITY_INCREASE];
+        items = temp;
+    }
+
+    public int length() {
+        return numberOfItems;
+    }
+
+    /**
+     * True if no elements in the list.
+     */
+    public boolean isEmpty() {
+        return numberOfItems == 0;
+    }
+
+    /**
+     * True if list is filled to capacity
+     */
+    public boolean isFull() {
+        return numberOfItems == items.length;
+    }
+
+    /**
+     * @return string of all list elements, 1 per line.
+     */
+    public String toString() {
+        String returnString = "";
+        for (int i = 0; i < numberOfItems; i++) {
+            returnString += items[i].toString() + "\n";
+        }
+        return returnString;
+    } // end toString()
+
+    /**
+     * Remove all elements in the list, replacing each with null.
+     */
+    public void clear() {
+        for (int i = 0; i < numberOfItems; i++) {
+            items[i] = null;
+        }
+        numberOfItems = 0;
+    } // end clear()
+
+    public void toArray(T[] copy) {
+        if (isEmpty()) {
+            return;
+        }
+        if (copy.length < numberOfItems) {
+            return;
+        }
+        for (int i = 0; i < length(); i++) {
+            copy[i] = items[i];
+        }
+    }
+
+    /**
+     * add given object to end of list.
+     *
+     * @param object of type T to be added.
+     */
+    public void add(T object) {
+        if (isFull()) {
+            increaseCapacity();
+        }
+        //System.out.println(object);
+        //System.out.println("add at "+numberOfItems);
+        items[numberOfItems] = object;
+        ++numberOfItems;
+    } // end add(T)
+
+    private void remove(int index) {
+        for (int j = index; j < length() - 1; j++) {
+            items[j] = items[j + 1];
+        }
+        --numberOfItems;
+    }
+
+    /**
+     *      */
+    public void remove(T object) {
+        if (isEmpty()) {
+            return;
+        }
+        int i = find(object);
+        if (i == -1) {
+            return;	// object not found
+        }
+        remove(i);
+    } // end remove(T)
+
+    /**
+     */
+    public void remove(Function<T, Object> getField, Object value) {
+        for (int i = 0; i < numberOfItems; i++) {
+            if (value.equals(getField.apply(items[i]))) {
+                remove(i);
+            }
+        }
+    } // end remove(lambda, value)
+
+    /**
+     * Find the object passed as parameter. Must satisfy "equals" comparison.
+     *
+     * @param object of type T to be found.
+     * @return location (index) of object within the list
+     */
+    private int find(T object) {
+        for (int i = 0; i < numberOfItems; i++) {
+            if (items[i].equals(object)) {
+                return i;
+            }
+        }
+        return -1;
+    } // end find(T)
+
+    /**
+     * Find the FIRST object in the list that matches the value.
+     *
+     * @param getField lambda fn to get value of key field
+     * @param value key value to match
+     * @return object found or null if none.
+     */
+    public T find(Function<T, Object> getField, Object value) {
+        for (int i = 0; i < numberOfItems; i++) {
+            if (value.equals(getField.apply(items[i]))) {
+                return items[i];
+            }
+        }
+        return null;
+    } // end find(lambda, value)
+
+    /**
+     * Increase capacity by default of 10.
+     */
+    public void increaseCapacity() {
+        int size = items.length + DEFAULT_CAPACITY_INCREASE;
+        @SuppressWarnings("unchecked")
+        T[] temp = (T[]) new Comparable[size];
+        for (int i = 0; i < numberOfItems; i++) {
+            temp[i] = items[i];
+        }
+        items = temp;
+    }
+
+    /**
+     * Trim to the nearest multiple of 10 that fits all the elements
+     */
+    public void trimToSize() {
+        // rounding size to the next integer
+        int sizeMultiplier
+                = (int) ((items.length / (double) DEFAULT_CAPACITY_INCREASE) + 0.5);
+        @SuppressWarnings("unchecked")
+        T[] temp = (T[]) new Comparable[sizeMultiplier * DEFAULT_CAPACITY_INCREASE];
+        for (int i = 0; i < numberOfItems; i++) {
+            temp[i] = items[i];
+        }
+        items = temp;
+    } // end trimToSize()
+
+} // end class ListOrder
