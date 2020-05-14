@@ -1,0 +1,325 @@
+
+import java.util.Comparator;
+import java.util.HashMap;
+
+/**
+ * Priority queue designed with a heap implemented with an array and backed up
+ * with a hashMap.
+ *
+ * @author Joseph Walker
+ * @param <T> Generic data type
+ */
+class PriorityQueue<T> {
+
+    T[] heap = null;
+    int numberOfItems = 0;
+    Comparator<T> priorityOrder = null;
+    HashMap<T, Integer> indexMap = new HashMap<>();
+
+    public PriorityQueue(Comparator<T> comp) {
+        @SuppressWarnings("unchecked")
+        T[] temp = (T[]) new Object[50];
+        heap = temp;
+        priorityOrder = comp;
+    } // end constructor MinHeap
+
+    /**
+     * Checks to see if array is full Checks to see if array is full
+     *
+     * @return T or F
+     */
+    public boolean isFull() {
+        return (numberOfItems == heap.length);
+    }
+
+    /**
+     * checks to see if the array is empty checks to see if the array is empty
+     *
+     * @return T or F
+     */
+    public boolean isEmpty() {
+        return (numberOfItems == 0);
+    }
+
+    /**
+     * add an element, maintaining heap property and maintains hashMap add an
+     * element, maintaining heap property and maintains hashMap
+     *
+     * @param el the element to add to the heap and hashMap
+     */
+    public void add(T el) {
+        if (isFull()) {
+            return;
+        }
+        if (isEmpty()) {
+            heap[numberOfItems] = el;
+            indexMap.put(el, 0);
+            ++numberOfItems;
+            return;
+        }
+        
+        heap[numberOfItems] = el;
+        ++numberOfItems;
+        indexMap.put(el, (numberOfItems-1));
+        heapifyFloat(numberOfItems - 1);
+    } // end add()
+
+    /**
+     * Add everything to the heap Add everything to the heap
+     *
+     * @param els The Array to add elements
+     */
+    public void addAll(T[] els) {
+        if ((numberOfItems + els.length) > heap.length) {
+            return;
+        }
+        for (T el : els) {
+            add(el);
+        }
+    }
+
+    /**
+     * Swaps elements within heap and resets the hashMap Swaps elements within
+     * heap and resets the hashMap
+     *
+     * @param ind1 The first index
+     * @param ind2 The second Index
+     */
+    public void swap(int ind1, int ind2) {
+        indexMap.remove(heap[ind2], ind2);
+        indexMap.remove(heap[ind1], ind1);
+        indexMap.put(heap[ind2], ind1);
+        indexMap.put(heap[ind1], ind2);
+        T temp = heap[ind1];
+        heap[ind1] = heap[ind2];
+        heap[ind2] = temp;
+    }
+
+    /**
+     * sink element i to proper place to maintain heap property. sink element i
+     * to proper place to maintain heap property.
+     *
+     * @param i the integer to sink down
+     */
+    private void heapifySink(int i) {
+        int left = i * 2 + 1;
+        int right = left + 1;
+        int maxInd = i;
+
+        if (heap[left] != null && priorityOrder.compare(heap[maxInd], heap[left]) < 0 && left < numberOfItems) {
+            maxInd = left;
+        }
+
+        if (heap[right] != null && priorityOrder.compare(heap[maxInd], heap[right]) < 0) {
+            maxInd = right;
+        }
+
+        if (maxInd != i) {
+            swap(i, maxInd);
+            heapifySink(maxInd);
+        }
+    }
+
+    /**
+     * float element i to proper place to maintain heap property. float element
+     * i to proper place to maintain heap property.
+     *
+     * @param i The integer to float up
+     */
+    private void heapifyFloat(int i) {
+        int parent;
+        T temp = heap[i];
+
+        while (i > 0) {
+            parent = (i - 1) / 2;
+            if (priorityOrder.compare(heap[i], heap[parent]) <= 0) {
+                return;
+            } else {
+                swap(i, parent);
+                i = parent;
+            }
+
+        }
+    }
+
+    /**
+     * Rebuilds the heap with a new comparator Rebuilds the heap with a new
+     * comparator
+     */
+    private void buildHeap() {
+        T[] temp = this.toArray();
+        clear();
+        for (T data : temp) {
+            add(data);
+        }
+    }
+
+    /**
+     * Resets heap with a new priority
+     *
+     * @param c the comparator for priority
+     */
+    public void reheap(Comparator<T> c) {
+        priorityOrder = c;
+        buildHeap();
+    }
+
+    /**
+     * Returns the highest Priority Element Returns the highest priority element
+     *
+     * @return T the element at the root
+     */
+    public T extract() {
+        if (isEmpty()) {
+            return null;
+        }
+        T temp = heap[0];
+        swap(0, (numberOfItems - 1));
+        --numberOfItems;
+        heap[numberOfItems] = null;
+        heapifySink(0);
+        indexMap.remove(temp);
+        return temp;
+    } // end extractMin()
+
+    /**
+     * Changes al elements key value to be repositioned Changes al elements key
+     * value to be repositioned
+     *
+     * @param el the element to adjust to
+     */
+    public void keyHasChanged(T el) {
+        if (!indexMap.containsKey(el)) {
+            return;
+        }
+        int i = find(el);
+        if (!heap[i].equals(el)) {
+            remove(el);
+            add(el);
+        }
+    } // end keyHasChanged()
+
+    /**
+     * Return the heap in an array sorted from highest priority to lowest.
+     * Return the heap in an array sorted from highest priority to lowest.
+     *
+     * @return The T[] array with elements
+     */
+    public T[] toArray() {
+        if(isEmpty()) { return null; }
+        @SuppressWarnings("unchecked")
+        T[] sorted = (T[]) new Object[numberOfItems];
+
+        for (int i = 0; i < numberOfItems; i++) {
+            sorted[i] = heap[i];
+        }
+        //Sorting
+        for (int i = 0; i < sorted.length - 1; ++i) {
+
+            // Find index of smallest remaining element
+            int indexSmallest = i;
+            for (int j = i + 1; j < sorted.length; ++j) {
+
+                if (this.priorityOrder.compare(sorted[j], sorted[indexSmallest]) > 0) {
+                    indexSmallest = j;
+                }
+            }
+
+            // Swap numbers[i] and numbers[indexSmallest]
+            T temp = sorted[i];
+            sorted[i] = sorted[indexSmallest];
+            sorted[indexSmallest] = temp;
+        }// End sorting
+
+        return sorted;
+    } // end sort()
+
+    /**
+     * Return the heap in an array sorted from highest priority to lowest.
+     * Return the heap in an array sorted from highest priority to lowest.
+     *
+     * @param comp the comparator for priority
+     * @return The T[] array with elements
+     */
+    public T[] toArray(Comparator<T> comp) {
+        if(isEmpty()) { return null; }
+        @SuppressWarnings("unchecked")
+        T[] sorted = (T[]) new Object[numberOfItems];
+
+        for (int i = 0; i < numberOfItems; i++) {
+            sorted[i] = heap[i];
+        }
+        //Sorting
+        for (int i = 0; i < sorted.length - 1; ++i) {
+
+            // Find index of smallest remaining element
+            int indexSmallest = i;
+            for (int j = i + 1; j < sorted.length; ++j) {
+
+                if (comp.compare(sorted[j], sorted[indexSmallest]) > 0) {
+                    indexSmallest = j;
+                }
+            }
+
+            // Swap numbers[i] and numbers[indexSmallest]
+            T temp = sorted[i];
+            sorted[i] = sorted[indexSmallest];
+            sorted[indexSmallest] = temp;
+        }// End sorting
+
+        return sorted;
+    } // end sort()
+
+    /**
+     * print the 3 highest priority items. do not extract them from the heap.
+     * print the 3 highest priority items. do not extract them from the heap.
+     */
+    public void peekTop3() {
+        T[] temp = toArray();
+        for (int i = 0; i < 3; i++) {
+            System.out.println("Element " + (i + 1) + ": " + temp[i]);
+        }
+    } // end peekTop3()
+
+    /**
+     * Clears all elements in the heap Clears all elements in the heap
+     */
+    public void clear() {
+        @SuppressWarnings("unchecked")
+        T[] temp = (T[]) new Object[50];
+        heap = temp;
+        numberOfItems = 0;
+    }
+
+    /**
+     * remove object from the heap remove object from the heap
+     *
+     * @param object Element to be removed
+     */
+    public void remove(T object) {
+        int i = find(object);
+        if (i == -1) {
+            return;
+        }
+        heapifySink(i);
+        swap(i, numberOfItems-1);
+        indexMap.remove(object);
+        heap[numberOfItems] = null;
+        --numberOfItems;
+    } // end remove(T)
+    
+    /**
+     * use the hashMap to find the element in the heap. use the hashMap to find
+     * the element in the heap.
+     *
+     * @param el the element to search for
+     * @return the index of the element
+     */
+    private int find(T el) {
+        if (!(indexMap.containsKey(el))) {
+            return -1;
+        }
+        return indexMap.get(el);
+    }
+    
+} // end class PriorityQueue
